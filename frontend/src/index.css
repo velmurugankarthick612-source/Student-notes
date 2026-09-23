@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Custom Modern Scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+/* ==============================================================================
+   DARK MODE OVERRIDES (INSTANT FULL-APP THEME CONVERSION)
+   ============================================================================== */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark, 
+html.dark body {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Dark mode surface backgrounds */
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/80,
+html.dark .bg-slate-50\/70,
+html.dark .bg-slate-50\/60,
+html.dark .bg-slate-50\/50 {
+  background-color: #0b0f19 !important;
+}
+
+html.dark .bg-white,
+html.dark .bg-white\/90,
+html.dark .bg-white\/80 {
+  background-color: #111827 !important;
+}
+
+html.dark .bg-slate-100 {
+  background-color: #1e293b !important;
+}
+
+/* Dark mode text colors */
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Dark mode borders */
+html.dark .border-slate-200,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/70,
+html.dark .border-slate-200\/60,
+html.dark .border-slate-100 {
+  border-color: #1e293b !important;
+}
+
+html.dark .border-slate-300 {
+  border-color: #334155 !important;
+}
+
+/* Dark mode form controls */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Dark mode hover states */
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-100:hover {
+  background-color: #1e293b !important;
+}
+
+/* Dark mode scrollbars */
+html.dark ::-webkit-scrollbar-track {
+  background: #0f172a !important;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155 !important;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569 !important;
+}
+
+/* Glass card styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+html.dark .glass-card {
+  background: rgba(17, 24, 39, 0.85) !important;
+  border-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+/* ==============================================================================
+   DYNAMIC ACCENT THEME PRESETS
+   ============================================================================== */
+
+/* 1. EMERALD */
+[data-accent="emerald"] .bg-indigo-600 { background-color: #059669 !important; }
+[data-accent="emerald"] .hover\:bg-indigo-700:hover { background-color: #047857 !important; }
+[data-accent="emerald"] .text-indigo-600 { color: #059669 !important; }
+[data-accent="emerald"] .text-indigo-700 { color: #047857 !important; }
+[data-accent="emerald"] .bg-indigo-50 { background-color: #ecfdf5 !important; }
+[data-accent="emerald"] .border-indigo-100 { border-color: #d1fae5 !important; }
+[data-accent="emerald"] .border-indigo-200 { border-color: #a7f3d0 !important; }
+[data-accent="emerald"] .border-indigo-300 { border-color: #6ee7b7 !important; }
+[data-accent="emerald"] .border-indigo-500 { border-color: #10b981 !important; }
+html.dark[data-accent="emerald"] .bg-indigo-50 { background-color: rgba(6, 78, 59, 0.4) !important; }
+
+/* 2. OCEAN BLUE */
+[data-accent="blue"] .bg-indigo-600 { background-color: #2563eb !important; }
+[data-accent="blue"] .hover\:bg-indigo-700:hover { background-color: #1d4ed8 !important; }
+[data-accent="blue"] .text-indigo-600 { color: #2563eb !important; }
+[data-accent="blue"] .text-indigo-700 { color: #1d4ed8 !important; }
+[data-accent="blue"] .bg-indigo-50 { background-color: #eff6ff !important; }
+[data-accent="blue"] .border-indigo-100 { border-color: #dbeafe !important; }
+[data-accent="blue"] .border-indigo-200 { border-color: #bfdbfe !important; }
+[data-accent="blue"] .border-indigo-300 { border-color: #93c5fd !important; }
+[data-accent="blue"] .border-indigo-500 { border-color: #3b82f6 !important; }
+html.dark[data-accent="blue"] .bg-indigo-50 { background-color: rgba(30, 58, 138, 0.4) !important; }
+
+/* 3. ROYAL PURPLE */
+[data-accent="purple"] .bg-indigo-600 { background-color: #9333ea !important; }
+[data-accent="purple"] .hover\:bg-indigo-700:hover { background-color: #7e22ce !important; }
+[data-accent="purple"] .text-indigo-600 { color: #9333ea !important; }
+[data-accent="purple"] .text-indigo-700 { color: #7e22ce !important; }
+[data-accent="purple"] .bg-indigo-50 { background-color: #faf5ff !important; }
+[data-accent="purple"] .border-indigo-100 { border-color: #f3e8ff !important; }
+[data-accent="purple"] .border-indigo-200 { border-color: #e9d5ff !important; }
+[data-accent="purple"] .border-indigo-300 { border-color: #d8b4fe !important; }
+[data-accent="purple"] .border-indigo-500 { border-color: #a855f7 !important; }
+html.dark[data-accent="purple"] .bg-indigo-50 { background-color: rgba(88, 28, 135, 0.4) !important; }
+
+/* 4. WARM AMBER */
+[data-accent="amber"] .bg-indigo-600 { background-color: #d97706 !important; }
+[data-accent="amber"] .hover\:bg-indigo-700:hover { background-color: #b45309 !important; }
+[data-accent="amber"] .text-indigo-600 { color: #d97706 !important; }
+[data-accent="amber"] .text-indigo-700 { color: #b45309 !important; }
+[data-accent="amber"] .bg-indigo-50 { background-color: #fffbeb !important; }
+[data-accent="amber"] .border-indigo-100 { border-color: #fef3c7 !important; }
+[data-accent="amber"] .border-indigo-200 { border-color: #fde68a !important; }
+[data-accent="amber"] .border-indigo-300 { border-color: #fcd34d !important; }
+[data-accent="amber"] .border-indigo-500 { border-color: #f59e0b !important; }
+html.dark[data-accent="amber"] .bg-indigo-50 { background-color: rgba(120, 53, 15, 0.4) !important; }
+
+/* 5. CRIMSON ROSE */
+[data-accent="rose"] .bg-indigo-600 { background-color: #e11d48 !important; }
+[data-accent="rose"] .hover\:bg-indigo-700:hover { background-color: #be123c !important; }
+[data-accent="rose"] .text-indigo-600 { color: #e11d48 !important; }
+[data-accent="rose"] .text-indigo-700 { color: #be123c !important; }
+[data-accent="rose"] .bg-indigo-50 { background-color: #fff1f2 !important; }
+[data-accent="rose"] .border-indigo-100 { border-color: #ffe4e6 !important; }
+[data-accent="rose"] .border-indigo-200 { border-color: #fecdd3 !important; }
+[data-accent="rose"] .border-indigo-300 { border-color: #fda4af !important; }
+[data-accent="rose"] .border-indigo-500 { border-color: #f43f5e !important; }
+html.dark[data-accent="rose"] .bg-indigo-50 { background-color: rgba(136, 19, 55, 0.4) !important; }
