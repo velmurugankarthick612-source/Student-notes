@@ -87,8 +87,8 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint (Strictly matching requirement)
-app.get('/api/health', (req, res) => {
+// Health check endpoints (Strictly matching requirement)
+app.get(['/api/health', '/health'], (req, res) => {
   res.status(200).json({
     success: true,
     message: 'StudyHub API is running',
