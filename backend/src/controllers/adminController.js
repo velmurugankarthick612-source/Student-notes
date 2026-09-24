@@ -393,6 +393,15 @@ const getUsers = async (req, res) => {
     const { data: users, count, error } = await query.range(offset, offset + limit - 1);
 
     if (error) {
+      if (error.code === 'PGRST205') {
+        const studentService = require('../services/studentService');
+        const fallback = await studentService.getStudents({ search, role, page, limit });
+        return res.status(200).json({
+          success: true,
+          data: fallback.students,
+          pagination: fallback.pagination,
+        });
+      }
       return res.status(500).json({
         success: false,
         message: 'Failed to retrieve users',

@@ -27,6 +27,9 @@ const getResourceRatings = async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) {
+      if (error.code === 'PGRST205') {
+        return res.status(200).json({ success: true, data: [] });
+      }
       return res.status(500).json({
         success: false,
         message: 'Failed to retrieve ratings',
