@@ -14,6 +14,7 @@ import {
   Building2,
   FolderKanban,
   Flag,
+  GraduationCap,
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -30,12 +31,13 @@ const Sidebar = () => {
   ];
 
   const adminLinks = [
-    { to: '/admin', label: 'Overview & Stats', icon: Shield },
+    { to: '/admin', label: 'Dashboard', icon: Shield },
+    { to: '/admin/students', label: 'Students', icon: GraduationCap, adminOnly: true },
+    { to: '/admin/departments', label: 'Departments', icon: Building2, adminOnly: true },
+    { to: '/admin/subjects', label: 'Subjects', icon: FolderKanban, adminOnly: true },
+    { to: '/admin/resources', label: 'Resources', icon: BookOpen },
     { to: '/admin/pending', label: 'Pending Approvals', icon: FileCheck },
-    { to: '/admin/reports', label: 'Reported Content', icon: Flag },
-    { to: '/admin/resources', label: 'All Resources', icon: BookOpen },
-    { to: '/admin/departments', label: 'Departments', icon: Building2 },
-    { to: '/admin/subjects', label: 'Subjects Management', icon: FolderKanban },
+    { to: '/admin/reports', label: 'Reports', icon: Flag },
     { to: '/admin/users', label: 'User Roles', icon: Users, adminOnly: true },
   ];
 
@@ -86,7 +88,7 @@ const Sidebar = () => {
         {(isAdmin || isModerator) && (
           <div>
             <p className="px-3 text-[11px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider mb-2">
-              Staff & Moderation
+              ADMINISTRATION
             </p>
             <div className="space-y-1">
               {adminLinks

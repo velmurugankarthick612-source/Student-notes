@@ -190,15 +190,23 @@ The `rls.sql` script creates the public `resources` storage bucket. You can also
 - Bucket Name: `resources`
 - Public: `true` (or private if using strictly signed URLs)
 
-### Step 5: Create the First Administrator Account
-1. Start the frontend app and register a new student account (e.g. `admin@studyhub.edu`).
-2. Run this command in your Supabase **SQL Editor**:
-```sql
-UPDATE public.profiles
-SET role = 'admin'
-WHERE email = 'admin@studyhub.edu';
+### Step 5: Administrator Account & Student Provisioning
+
+> **Demo Admin Account**
+>
+> Email: `admin@studyhub.local`  
+> Password: `Admin@12345`  
+>
+> *Change/remove this account before production deployment.*
+
+To provision or update the demo administrator account, run:
+```bash
+cd backend
+npm run create:demo-admin
 ```
-Now logging into this account will give you full administrative permissions.
+Or execute `supabase/create_demo_users.sql` directly in your Supabase **SQL Editor**.
+
+Public student registration is **disabled**. Only authenticated Admins can create student profiles from `/admin/students` via the secure backend API (`POST /api/admin/students`). Student accounts are assigned `role = 'student'` and `status = 'active'`. Deactivated students are prevented from logging in.
 
 ---
 
@@ -254,11 +262,16 @@ The frontend application starts on **http://localhost:5173**.
 - `POST /api/departments`: Create department (Admin only)
 - `PUT /api/departments/:id`: Update department (Admin only)
 - `DELETE /api/departments/:id`: Delete department (Admin only)
-- `GET /api/subjects`: List subjects with `?department_id=` and `?semester=`
+- `GET /api/subjects`: List active curriculum subjects with `?department_id=` and `?semester=`
 - `GET /api/subjects/:id`: Subject details with unit list
-- `POST /api/subjects`: Create subject (Admin only)
-- `GET /api/units`: List syllabus units for `?subject_id=`
-- `POST /api/units`: Create unit (Admin only)
+- `GET /api/subjects/:subjectId/units`: List all syllabus units for subject
+- `POST /api/admin/subjects`: Create subject (Admin only)
+- `PUT /api/admin/subjects/:id`: Update subject (Admin only)
+- `DELETE /api/admin/subjects/:id`: Delete subject with dependency safeguards (Admin only)
+- `PATCH /api/admin/subjects/:id/status`: Toggle active / inactive status (Admin only)
+- `POST /api/admin/subjects/:subjectId/units`: Create syllabus unit (Admin only)
+- `PUT /api/admin/units/:id`: Update unit (Admin only)
+- `DELETE /api/admin/units/:id`: Delete unit (Admin only)
 
 ### Resources & Search
 - `GET /api/resources/search`: Multi-parameter search (`?q=&department=&semester=&subject=&unit=&resourceType=&sort=&page=&limit=`)

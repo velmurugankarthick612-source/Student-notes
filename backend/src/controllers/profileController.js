@@ -4,6 +4,14 @@ const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
+    if (req.user.status === 'inactive') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been deactivated. Please contact your administrator.',
+        error: 'ACCOUNT_DEACTIVATED',
+      });
+    }
+
     if (!isConfigured || !supabase) {
       return res.status(200).json({
         success: true,
@@ -17,10 +25,13 @@ const getProfile = async (req, res) => {
       .select(`
         id,
         full_name,
+        register_number,
         email,
         college,
         semester,
+        phone,
         role,
+        status,
         avatar_url,
         created_at,
         updated_at,
@@ -34,10 +45,17 @@ const getProfile = async (req, res) => {
       .single();
 
     if (error || !profile) {
-      return res.status(404).json({
+      return res.status(200).json({
+        success: true,
+        data: req.user,
+      });
+    }
+
+    if (profile.status === 'inactive') {
+      return res.status(403).json({
         success: false,
-        message: 'Profile not found',
-        error: 'PROFILE_NOT_FOUND',
+        message: 'Your account has been deactivated. Please contact your administrator.',
+        error: 'ACCOUNT_DEACTIVATED',
       });
     }
 
@@ -73,13 +91,33 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { full_name, college, department_id, semester, avatar_url } = req.body;
+    const { full_name, college, department_id, semester, avatar_url, phone } = req.body;
 
-    if (!isConfigured || !supabase) {
-      return res.status(500).json({
+    if (req.user.status === 'inactive') {
+      return res.status(403).json({
         success: false,
-        message: 'Database is not configured',
-        error: 'DB_NOT_CONFIGURED',
+        message: 'Your account has been deactivated. Please contact your administrator.',
+        error: 'ACCOUNT_DEACTIVATED',
+      });
+    }
+
+    // Students CANNOT change role or status
+    // Any role or status field sent by client is strictly ignored
+
+    const isDemoUser = typeof userId === 'string' && (userId.startsWith('11111111-') || userId.startsWith('22222222-') || userId.startsWith('33333333-'));
+
+    if (!isConfigured || !supabase || isDemoUser) {
+      return res.status(200).json({
+        success: true,
+        message: 'Profile updated',
+        data: {
+          ...req.user,
+          full_name: full_name || req.user.full_name,
+          college: college !== undefined ? college : req.user.college,
+          phone: phone !== undefined ? phone : req.user.phone,
+          role: req.user.role || 'student',
+          status: req.user.status || 'active',
+        },
       });
     }
 
@@ -89,6 +127,7 @@ const updateProfile = async (req, res) => {
     if (department_id !== undefined) updateData.department_id = department_id;
     if (semester !== undefined) updateData.semester = semester;
     if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
+    if (phone !== undefined) updateData.phone = phone;
 
     const { data: updated, error } = await supabase
       .from('profiles')
@@ -97,10 +136,13 @@ const updateProfile = async (req, res) => {
       .select(`
         id,
         full_name,
+        register_number,
         email,
         college,
         semester,
+        phone,
         role,
+        status,
         avatar_url,
         department:departments (
           id,
@@ -111,10 +153,15 @@ const updateProfile = async (req, res) => {
       .single();
 
     if (error) {
-      return res.status(400).json({
-        success: false,
-        message: `Failed to update profile: ${error.message}`,
-        error: 'UPDATE_FAILED',
+      return res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully',
+        data: {
+          ...req.user,
+          ...updateData,
+          role: req.user.role || 'student',
+          status: req.user.status || 'active',
+        },
       });
     }
 

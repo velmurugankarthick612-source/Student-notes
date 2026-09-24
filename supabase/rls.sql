@@ -48,13 +48,16 @@ CREATE POLICY "Users can insert their own profile"
     ON public.profiles FOR INSERT
     WITH CHECK (auth.uid() = id);
 
-CREATE POLICY "Users can update their own profile (cannot escalate role)"
+CREATE POLICY "Users can update their own profile (cannot change role or status)"
     ON public.profiles FOR UPDATE
     USING (auth.uid() = id)
     WITH CHECK (
         auth.uid() = id
         AND (
-            role = (SELECT role FROM public.profiles WHERE id = auth.uid())
+            (
+                role = (SELECT role FROM public.profiles WHERE id = auth.uid())
+                AND status = (SELECT status FROM public.profiles WHERE id = auth.uid())
+            )
             OR public.is_admin()
         )
     );
@@ -62,6 +65,20 @@ CREATE POLICY "Users can update their own profile (cannot escalate role)"
 CREATE POLICY "Admins can perform any operation on profiles"
     ON public.profiles FOR ALL
     USING (public.is_admin());
+
+-- ------------------------------------------------------------------------------
+-- ADMIN AUDIT LOGS POLICIES
+-- ------------------------------------------------------------------------------
+ALTER TABLE public.admin_audit_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins can view audit logs"
+    ON public.admin_audit_logs FOR SELECT
+    USING (public.is_admin());
+
+CREATE POLICY "Admins can insert audit logs"
+    ON public.admin_audit_logs FOR INSERT
+    WITH CHECK (public.is_admin());
+
 
 -- ------------------------------------------------------------------------------
 -- DEPARTMENTS POLICIES
@@ -77,23 +94,48 @@ CREATE POLICY "Admins can manage departments"
 -- ------------------------------------------------------------------------------
 -- SUBJECTS POLICIES
 -- ------------------------------------------------------------------------------
-CREATE POLICY "Subjects are viewable by everyone"
+-- 1. Students/public view active subjects; moderators/admins view all subjects
+CREATE POLICY "Active subjects are viewable by students, all by staff"
     ON public.subjects FOR SELECT
-    USING (true);
+    USING (
+        status = 'active'
+        OR public.is_moderator_or_admin()
+    );
 
-CREATE POLICY "Admins can manage subjects"
-    ON public.subjects FOR ALL
+-- 2. Strictly Admin-only creation, modification, and deletion
+CREATE POLICY "Admins can insert subjects"
+    ON public.subjects FOR INSERT
+    WITH CHECK (public.is_admin());
+
+CREATE POLICY "Admins can update subjects"
+    ON public.subjects FOR UPDATE
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+CREATE POLICY "Admins can delete subjects"
+    ON public.subjects FOR DELETE
     USING (public.is_admin());
 
 -- ------------------------------------------------------------------------------
 -- UNITS POLICIES
 -- ------------------------------------------------------------------------------
+-- 1. Units viewable by everyone
 CREATE POLICY "Units are viewable by everyone"
     ON public.units FOR SELECT
     USING (true);
 
-CREATE POLICY "Admins can manage units"
-    ON public.units FOR ALL
+-- 2. Strictly Admin-only creation, modification, and deletion
+CREATE POLICY "Admins can insert units"
+    ON public.units FOR INSERT
+    WITH CHECK (public.is_admin());
+
+CREATE POLICY "Admins can update units"
+    ON public.units FOR UPDATE
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+CREATE POLICY "Admins can delete units"
+    ON public.units FOR DELETE
     USING (public.is_admin());
 
 -- ------------------------------------------------------------------------------

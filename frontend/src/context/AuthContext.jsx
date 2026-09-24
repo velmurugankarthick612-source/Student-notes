@@ -17,11 +17,19 @@ export const AuthProvider = ({ children }) => {
       }
       const res = await api.get('/profile');
       if (res.success && res.data) {
+        if (res.data.status === 'inactive') {
+          await logout();
+          throw new Error('Your account has been deactivated. Please contact your administrator.');
+        }
         setUser(res.data);
+        return res.data;
       }
     } catch (err) {
+      if (err.message && err.message.toLowerCase().includes('deactivated')) {
+        await logout();
+        throw err;
+      }
       console.warn('Could not fetch user profile from backend:', err.message);
-      // Fallback: If token exists, decode or keep basic info
     }
   };
 
@@ -88,59 +96,59 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    if (!isSupabaseConfigured || !supabase) {
-      throw new Error('Supabase is not configured yet. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in frontend/.env.');
+    // 1. Try Supabase Auth if configured
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (!error && data?.session) {
+          setSession(data.session);
+          localStorage.setItem('studyhub_token', data.session.access_token);
+          const profile = await fetchUserProfile(data.session.access_token);
+          if (profile?.status === 'inactive') {
+            await logout();
+            throw new Error('Your account has been deactivated. Please contact your administrator.');
+          }
+          return profile || data.user;
+        } else if (error && error.message.toLowerCase().includes('deactivated')) {
+          throw new Error('Your account has been deactivated. Please contact your administrator.');
+        }
+      } catch (sbErr) {
+        if (sbErr.message && sbErr.message.toLowerCase().includes('deactivated')) {
+          throw sbErr;
+        }
+        // If Supabase authentication returned invalid credentials or failed, check backend API fallback
+      }
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw new Error(error.message);
+    // 2. Call Backend Authentication endpoint
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      if (res.success && res.data) {
+        if (res.data.status === 'inactive') {
+          throw new Error('Your account has been deactivated. Please contact your administrator.');
+        }
+        localStorage.setItem('studyhub_token', res.token);
+        setUser(res.data);
+        return res.data;
+      }
+    } catch (apiErr) {
+      if (apiErr.message && apiErr.message.toLowerCase().includes('deactivated')) {
+        throw new Error('Your account has been deactivated. Please contact your administrator.');
+      }
+      throw new Error(apiErr.message || 'Login failed. Please check your credentials.');
     }
 
-    if (data.session) {
-      setSession(data.session);
-      localStorage.setItem('studyhub_token', data.session.access_token);
-      await fetchUserProfile(data.session.access_token);
-    }
-
-    return data;
+    throw new Error('Login failed. Please check your credentials.');
   };
 
-  const register = async (email, password, metadata = {}) => {
-    if (!isSupabaseConfigured || !supabase) {
-      throw new Error('Supabase is not configured yet. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in frontend/.env.');
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: metadata.full_name || email.split('@')[0],
-          college: metadata.college || '',
-          department_id: metadata.department_id || null,
-          semester: metadata.semester || null,
-          role: 'student',
-        },
-      },
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    if (data.session) {
-      setSession(data.session);
-      localStorage.setItem('studyhub_token', data.session.access_token);
-      await fetchUserProfile(data.session.access_token);
-    }
-
-    return data;
+  const register = () => {
+    throw new Error('Public student registration is disabled. Student accounts must be created by an administrator.');
   };
+
 
   const loginAsDemo = (role = 'student') => {
     const demoProfiles = {
@@ -183,9 +191,10 @@ export const AuthProvider = ({ children }) => {
       admin: {
         id: '33333333-3333-3333-3333-333333333333',
         full_name: 'StudyHub Administrator',
-        email: 'admin.demo@studyhub.edu',
+        email: 'admin@studyhub.local',
         college: 'Anna University Campus',
         role: 'admin',
+        status: 'active',
         semester: 8,
         department: {
           id: 'a0000000-0000-0000-0000-000000000001',

@@ -45,19 +45,20 @@ VALUES (
   '33333333-3333-3333-3333-333333333333',
   'authenticated',
   'authenticated',
-  'admin@studyhub.com',
-  crypt('Admin@123456', gen_salt('bf')),
+  'admin@studyhub.local',
+  crypt('Admin@12345', gen_salt('bf')),
   NOW(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"StudyHub Administrator","role":"admin"}',
+  '{"full_name":"StudyHub Administrator","role":"admin","status":"active"}',
   NOW(),
   NOW(),
   ''
 )
 ON CONFLICT (id) DO UPDATE SET
-  encrypted_password = crypt('Admin@123456', gen_salt('bf')),
+  email = 'admin@studyhub.local',
+  encrypted_password = crypt('Admin@12345', gen_salt('bf')),
   email_confirmed_at = NOW(),
-  raw_user_meta_data = '{"full_name":"StudyHub Administrator","role":"admin"}';
+  raw_user_meta_data = '{"full_name":"StudyHub Administrator","role":"admin","status":"active"}';
 
 -- 2. Insert or Update Demo Moderator in auth.users
 INSERT INTO auth.users (
@@ -128,11 +129,15 @@ ON CONFLICT (id) DO UPDATE SET
   raw_user_meta_data = '{"full_name":"Priya Sharma (Student)","role":"student"}';
 
 -- 4. Sync with public.profiles
-INSERT INTO public.profiles (id, full_name, email, role, college, semester, department_id)
+INSERT INTO public.profiles (id, full_name, register_number, email, role, status, phone, college, semester, department_id)
 VALUES 
-  ('33333333-3333-3333-3333-333333333333', 'StudyHub Administrator', 'admin@studyhub.com', 'admin', 'Anna University', 8, 'a0000000-0000-0000-0000-000000000001'),
-  ('22222222-2222-2222-2222-222222222222', 'David Chen (Moderator)', 'moderator@studyhub.com', 'moderator', 'National Institute of Technology', 6, 'a0000000-0000-0000-0000-000000000002'),
-  ('11111111-1111-1111-1111-111111111111', 'Priya Sharma (Student)', 'student@studyhub.com', 'student', 'College of Engineering, Guindy', 4, 'a0000000-0000-0000-0000-000000000001')
+  ('33333333-3333-3333-3333-333333333333', 'StudyHub Administrator', 'ADM001', 'admin@studyhub.local', 'admin', 'active', '9876543200', 'Anna University', 8, 'a0000000-0000-0000-0000-000000000001'),
+  ('22222222-2222-2222-2222-222222222222', 'David Chen (Moderator)', 'MOD001', 'moderator@studyhub.com', 'moderator', 'active', '9876543201', 'National Institute of Technology', 6, 'a0000000-0000-0000-0000-000000000002'),
+  ('11111111-1111-1111-1111-111111111111', 'Priya Sharma (Student)', 'REG2024001', 'student@studyhub.com', 'student', 'active', '9876543210', 'College of Engineering, Guindy', 4, 'a0000000-0000-0000-0000-000000000001')
 ON CONFLICT (id) DO UPDATE SET
   full_name = EXCLUDED.full_name,
+  register_number = EXCLUDED.register_number,
+  status = EXCLUDED.status,
+  phone = EXCLUDED.phone,
   role = EXCLUDED.role;
+

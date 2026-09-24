@@ -16,6 +16,7 @@ import {
   XCircle,
   Eye,
   Building,
+  GraduationCap,
 } from 'lucide-react';
 import { formatDate, formatBytes } from '../utils/formatters';
 
@@ -101,6 +102,20 @@ const AdminDashboard = () => {
 
           <div className="flex items-center space-x-2">
             <Link
+              to="/admin/subjects"
+              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all flex items-center space-x-2"
+            >
+              <FolderKanban className="w-4 h-4 text-indigo-400" />
+              <span>Manage Subjects</span>
+            </Link>
+            <Link
+              to="/admin/students"
+              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center space-x-2"
+            >
+              <GraduationCap className="w-4 h-4" />
+              <span>Manage Students</span>
+            </Link>
+            <Link
               to="/admin/pending"
               className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition-all flex items-center space-x-2"
             >
@@ -111,7 +126,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* 6 Key Metrics Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
           <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
             <div className="flex items-center justify-between mb-3 text-slate-400">
               <span className="text-[11px] font-bold uppercase tracking-wider">Total Users</span>
@@ -158,6 +173,46 @@ const AdminDashboard = () => {
               <Flag className="w-4 h-4 text-rose-500" />
             </div>
             <div className="text-2xl font-black text-rose-600">{stats?.totalReports || 0}</div>
+          </div>
+        </div>
+
+        {/* Academic Curriculum Taxonomy Statistics */}
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-5 mb-8 shadow-sm">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">Academic Curriculum Taxonomy</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Real-time counts of academic departments, course subjects, and syllabus units</p>
+            </div>
+            <Link
+              to="/admin/subjects"
+              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center space-x-1"
+            >
+              <span>Manage Curriculum</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Departments</span>
+              <span className="text-2xl font-black text-slate-900">{stats?.totalDepartments ?? 6}</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-100">
+              <span className="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">Total Subjects</span>
+              <span className="text-2xl font-black text-indigo-700">{stats?.totalSubjects ?? 0}</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100">
+              <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block mb-1">Active Subjects</span>
+              <span className="text-2xl font-black text-emerald-700">{stats?.activeSubjects ?? 0}</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-100/60 border border-slate-200">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Inactive Subjects</span>
+              <span className="text-2xl font-black text-slate-700">{stats?.inactiveSubjects ?? 0}</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100">
+              <span className="text-[11px] font-bold text-purple-600 uppercase tracking-wider block mb-1">Syllabus Units</span>
+              <span className="text-2xl font-black text-purple-700">{stats?.totalUnits ?? 0}</span>
+            </div>
           </div>
         </div>
 

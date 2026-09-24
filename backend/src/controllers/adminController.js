@@ -1,9 +1,11 @@
 const { supabase, isConfigured } = require('../config/supabase');
 const { deleteResourceFile } = require('../services/storageService');
+const subjectService = require('../services/subjectService');
 
 const getPlatformStatistics = async (req, res) => {
   try {
     if (!isConfigured || !supabase) {
+      const subjectStats = await subjectService.getSubjectStats();
       return res.status(200).json({
         success: true,
         data: {
@@ -13,9 +15,15 @@ const getPlatformStatistics = async (req, res) => {
           approvedResources: 0,
           totalDownloads: 0,
           totalReports: 0,
+          totalDepartments: subjectStats.totalDepartments,
+          totalSubjects: subjectStats.totalSubjects,
+          activeSubjects: subjectStats.activeSubjects,
+          inactiveSubjects: subjectStats.inactiveSubjects,
+          totalUnits: subjectStats.totalUnits,
           recentUploads: [],
           pendingApprovals: [],
           recentReports: [],
+          topDownloaded: [],
         },
       });
     }
@@ -94,6 +102,38 @@ const getPlatformStatistics = async (req, res) => {
     ]);
 
     const totalDownloads = (downloadSumData || []).reduce((acc, curr) => acc + (curr.downloads || 0), 0);
+    const subjectStats = await subjectService.getSubjectStats();
+
+    // Query Supabase for curriculum stats if available
+    let deptCount = subjectStats.totalDepartments;
+    let subjCount = subjectStats.totalSubjects;
+    let activeSubjCount = subjectStats.activeSubjects;
+    let inactiveSubjCount = subjectStats.inactiveSubjects;
+    let unitCount = subjectStats.totalUnits;
+
+    try {
+      const [
+        { count: dbDepts },
+        { count: dbSubjs },
+        { count: dbActiveSubjs },
+        { count: dbInactiveSubjs },
+        { count: dbUnits },
+      ] = await Promise.all([
+        supabase.from('departments').select('*', { count: 'exact', head: true }),
+        supabase.from('subjects').select('*', { count: 'exact', head: true }),
+        supabase.from('subjects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('subjects').select('*', { count: 'exact', head: true }).eq('status', 'inactive'),
+        supabase.from('units').select('*', { count: 'exact', head: true }),
+      ]);
+
+      if (dbDepts !== null && dbDepts !== undefined) deptCount = dbDepts;
+      if (dbSubjs !== null && dbSubjs !== undefined) subjCount = dbSubjs;
+      if (dbActiveSubjs !== null && dbActiveSubjs !== undefined) activeSubjCount = dbActiveSubjs;
+      if (dbInactiveSubjs !== null && dbInactiveSubjs !== undefined) inactiveSubjCount = dbInactiveSubjs;
+      if (dbUnits !== null && dbUnits !== undefined) unitCount = dbUnits;
+    } catch (e) {
+      // Keep subjectStats fallback
+    }
 
     return res.status(200).json({
       success: true,
@@ -104,6 +144,11 @@ const getPlatformStatistics = async (req, res) => {
         approvedResources: approvedResources || 0,
         totalDownloads,
         totalReports: totalReports || 0,
+        totalDepartments: deptCount,
+        totalSubjects: subjCount,
+        activeSubjects: activeSubjCount,
+        inactiveSubjects: inactiveSubjCount,
+        totalUnits: unitCount,
         recentUploads: recentUploads || [],
         pendingApprovals: pendingApprovals || [],
         recentReports: recentReports || [],

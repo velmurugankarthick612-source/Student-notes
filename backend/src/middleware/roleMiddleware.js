@@ -9,10 +9,18 @@ const requireRole = (...allowedRoles) => {
     }
 
     if (!allowedRoles.includes(req.user.role)) {
+      if (allowedRoles.length === 1 && allowedRoles[0] === 'admin') {
+        return res.status(403).json({
+          success: false,
+          message: 'Admin access required',
+          error: 'FORBIDDEN',
+        });
+      }
+
       return res.status(403).json({
         success: false,
         message: `Forbidden: This action requires one of the following roles: [${allowedRoles.join(', ')}]. Your role is '${req.user.role}'.`,
-        error: 'FORBIDDEN_INSUFFICIENT_ROLE',
+        error: 'FORBIDDEN',
       });
     }
 

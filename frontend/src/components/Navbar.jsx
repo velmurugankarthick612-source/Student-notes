@@ -159,6 +159,17 @@ const Navbar = () => {
                         <span>My Profile</span>
                       </Link>
 
+                      {isAdmin && (
+                        <Link
+                          to="/admin/students"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                        >
+                          <GraduationCap className="w-4 h-4 text-indigo-500" />
+                          <span>Manage Students</span>
+                        </Link>
+                      )}
+
                       {(isAdmin || isModerator) && (
                         <Link
                           to="/admin"
@@ -182,18 +193,12 @@ const Navbar = () => {
                 </div>
               </>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center">
                 <Link
                   to="/login"
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/20 transition-all"
                 >
-                  Log In
-                </Link>
-                <Link
-                  to="/register"
-                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/20 transition-all"
-                >
-                  Get Started
+                  Sign In
                 </Link>
               </div>
             )}
@@ -274,6 +279,15 @@ const Navbar = () => {
               >
                 Profile
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin/students"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-lg text-base font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                >
+                  Manage Students
+                </Link>
+              )}
               {(isAdmin || isModerator) && (
                 <Link
                   to="/admin"
@@ -294,20 +308,13 @@ const Navbar = () => {
               </button>
             </div>
           ) : (
-            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-2">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
               <Link
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-center py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="block text-center py-2.5 rounded-xl bg-indigo-600 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
               >
-                Log In
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-center py-2.5 rounded-lg bg-indigo-600 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
-              >
-                Register
+                Sign In
               </Link>
             </div>
           )}

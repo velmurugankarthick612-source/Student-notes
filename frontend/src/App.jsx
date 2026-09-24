@@ -8,7 +8,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Public Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import About from './pages/About';
 import Resources from './pages/Resources';
 import ResourceDetails from './pages/ResourceDetails';
@@ -31,6 +30,7 @@ import DepartmentManagement from './pages/DepartmentManagement';
 import SubjectManagement from './pages/SubjectManagement';
 import UnitManagement from './pages/UnitManagement';
 import UserManagement from './pages/UserManagement';
+import StudentManagement from './pages/StudentManagement';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -46,7 +46,7 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                <Route path="/register" element={<Navigate to="/login" replace />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/resources/:id" element={<ResourceDetails />} />
@@ -159,6 +159,14 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <UserManagement />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/students"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <StudentManagement />
                     </ProtectedRoute>
                   }
                 />

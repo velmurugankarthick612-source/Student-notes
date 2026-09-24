@@ -105,10 +105,10 @@ const Home = () => {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              to="/register"
+              to="/login"
               className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-sm border border-slate-200 dark:border-slate-700 shadow-sm transition-all"
             >
-              <span>Create Student Account</span>
+              <span>Student Sign In</span>
             </Link>
           </div>
         </div>
@@ -292,8 +292,7 @@ const Home = () => {
             <div>
               <h4 className="text-white font-semibold text-sm mb-3">User Area</h4>
               <ul className="space-y-2">
-                <li><Link to="/login" className="hover:text-white transition-colors">Student Login</Link></li>
-                <li><Link to="/register" className="hover:text-white transition-colors">Register Account</Link></li>
+                <li><Link to="/login" className="hover:text-white transition-colors">Sign In Portal</Link></li>
                 <li><Link to="/dashboard" className="hover:text-white transition-colors">My Dashboard</Link></li>
               </ul>
             </div>

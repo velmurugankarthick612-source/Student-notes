@@ -24,15 +24,19 @@ CREATE TABLE IF NOT EXISTS public.departments (
 CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     full_name TEXT NOT NULL,
-    email TEXT NOT NULL,
+    register_number TEXT UNIQUE,
+    email TEXT UNIQUE NOT NULL,
     college TEXT,
     department_id UUID REFERENCES public.departments(id) ON DELETE SET NULL,
     semester INTEGER CHECK (semester >= 1 AND semester <= 8),
+    phone TEXT,
     role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'moderator', 'admin')),
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
     avatar_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- ------------------------------------------------------------------------------
 -- 3. SUBJECTS TABLE
@@ -42,10 +46,12 @@ CREATE TABLE IF NOT EXISTS public.subjects (
     department_id UUID NOT NULL REFERENCES public.departments(id) ON DELETE CASCADE,
     semester INTEGER NOT NULL CHECK (semester >= 1 AND semester <= 8),
     name TEXT NOT NULL,
-    code TEXT,
+    code TEXT NOT NULL,
     description TEXT,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT uq_subjects_dept_code UNIQUE (department_id, code)
 );
 
 -- ------------------------------------------------------------------------------
@@ -224,6 +230,30 @@ CREATE TRIGGER set_ratings_updated_at
     EXECUTE FUNCTION public.handle_updated_at();
 
 -- ------------------------------------------------------------------------------
+-- 10. ADMIN AUDIT LOGS TABLE
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    admin_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    action TEXT NOT NULL CHECK (
+        action IN (
+            'STUDENT_CREATED',
+            'STUDENT_UPDATED',
+            'STUDENT_ACTIVATED',
+            'STUDENT_DEACTIVATED',
+            'STUDENT_DELETED'
+        )
+    ),
+    target_user_id UUID,
+    details JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_admin_id ON public.admin_audit_logs(admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_action ON public.admin_audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_created_at ON public.admin_audit_logs(created_at DESC);
+
+-- ------------------------------------------------------------------------------
 -- 12. AUTOMATIC PROFILE CREATION TRIGGER ON AUTH.USERS INSERT
 -- ------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -232,22 +262,38 @@ BEGIN
     INSERT INTO public.profiles (
         id,
         full_name,
+        register_number,
         email,
         college,
+        department_id,
+        semester,
+        phone,
         role,
+        status,
         avatar_url
     )
     VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
+        NEW.raw_user_meta_data->>'register_number',
         NEW.email,
         COALESCE(NEW.raw_user_meta_data->>'college', ''),
+        (NEW.raw_user_meta_data->>'department_id')::UUID,
+        (NEW.raw_user_meta_data->>'semester')::INTEGER,
+        NEW.raw_user_meta_data->>'phone',
         COALESCE(NEW.raw_user_meta_data->>'role', 'student'),
+        COALESCE(NEW.raw_user_meta_data->>'status', 'active'),
         COALESCE(NEW.raw_user_meta_data->>'avatar_url', '')
     )
     ON CONFLICT (id) DO UPDATE SET
         full_name = EXCLUDED.full_name,
-        email = EXCLUDED.email;
+        register_number = COALESCE(EXCLUDED.register_number, profiles.register_number),
+        email = EXCLUDED.email,
+        college = EXCLUDED.college,
+        department_id = COALESCE(EXCLUDED.department_id, profiles.department_id),
+        semester = COALESCE(EXCLUDED.semester, profiles.semester),
+        phone = COALESCE(EXCLUDED.phone, profiles.phone),
+        status = COALESCE(EXCLUDED.status, profiles.status);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -256,3 +302,4 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
